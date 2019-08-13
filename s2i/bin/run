@@ -1,0 +1,3 @@
+set -eo pipefail
+
+exec node index.js
