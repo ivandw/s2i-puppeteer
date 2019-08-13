@@ -1,1 +1,3 @@
-exec node index.js
+#!/bin/bash -e
+set -e
+exec "node ${HOME}/index.js"
