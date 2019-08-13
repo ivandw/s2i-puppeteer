@@ -1,4 +1,4 @@
-set -eo pipefail
+set -e
 
 echo "---> Copiando source files"
 
@@ -7,11 +7,6 @@ rm -rf /tmp/src/.git*
 cp -Rf /tmp/src/. ${HOME}/
 
 rm -rf /tmp/src
-
-echo "---> Running GitBook build"
-
-set +eo pipefail
-
 echo "---> Fix permissions on source files"
 
 chmod -Rf g+w ${HOME}/ || true
