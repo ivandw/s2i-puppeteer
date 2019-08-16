@@ -15,6 +15,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
  # ENTRYPOINT ["dumb-init", "--"]
+ ARG S2IDIR="/opt/app-root/s2i"
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
 # you'll need to launch puppeteer with:
@@ -23,26 +24,26 @@ RUN chmod +x /usr/local/bin/dumb-init
 
 # Install puppeteer so it's available in the container.
 
-RUN useradd -u 1001 -r -g 0 -G audio,video -d ${HOME} -s /sbin/nologin -c "Default Application User" default \
-    && mkdir -p ${HOME} \
-    && chown -R 1001:0 ${HOME} && chmod -R g+rwX ${HOME}
+RUN useradd -u 1001 -r -g 0 -G audio,video -d /opt/app-root -s /sbin/nologin -c "Default Application User" default \
+    && mkdir -p /opt/app-root \
+    && chown -R 1001:0 /opt/app-root && chmod -R g+rwX /opt/app-root
 
-COPY s2i ${HOME}/s2i
-
+COPY s2i "$S2IDIR/"
+RUN chmod 777 -R $S2IDIR
 
 LABEL io.k8s.description="S2I builder image for puppeteer" \
       io.k8s.display-name="puppeteer" \
       io.openshift.expose-services="8080:http" \
       io.openshift.tags="puppeteer" \
-      io.openshift.s2i.scripts-url="image:///home/1001/s2i/bin"
+      io.openshift.s2i.scripts-url="image:///opt/app-root/s2i/bin"
 #aseguro que puedan ejecutar los scripts
 
 RUN chown -R 1001:0 /opt/app-root && \
-    find /home/1001/s2i -type d -exec chmod g+ws {} \;
+    find /opt/app-root/s2i/bin -type d -exec chmod g+ws {} \;
 
 # Run everything after as non-privileged user.
 USER 1001
-
+ENV HOME=/opt/app-root
 
 RUN mkdir /opt/app-root/src && \
 find /opt/app-root -type d -exec chmod g+ws {} \;
@@ -53,6 +54,6 @@ WORKDIR /opt/app-root/src
 
 # corro usage
 
-CMD [ "/home/1001/s2i/bin/usage" ]
+CMD [ "/opt/app-root/s2i/bin/usage" ]
 
 #CMD ["google-chrome-unstable"]
