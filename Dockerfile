@@ -33,14 +33,14 @@ RUN npm i puppeteer \
     && chown -R 1001:0 /node_modules
 
 
-COPY ./s2i/ /opt/app-root/s2i
+COPY s2i /home/1001/s2i
 
 
 LABEL io.k8s.description="S2I builder image for puppeteer" \
       io.k8s.display-name="puppeteer" \
       io.openshift.expose-services="8080:http" \
       io.openshift.tags="puppeteer" \
-      io.openshift.s2i.scripts-url="image:///opt/app-root/s2i/bin"
+      io.openshift.s2i.scripts-url="image:///home/1001/s2i/bin"
 #aseguro que puedan ejecutar los scripts
 
 RUN chown -R 1001:0 /opt/app-root/s2i && \
