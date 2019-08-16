@@ -1,12 +1,13 @@
+#!bin/bash
+
 set -e
-
 echo "---> Copiando source files"
-
 rm -rf /tmp/src/.git*
 
-cp -Rf /tmp/src/. ${HOME}/
-
+cp -Rf /tmp/src/. ${HOME}/src
+cd ${HOME}/src
+npm install
+npm run build
 rm -rf /tmp/src
 echo "---> Fix permissions on source files"
-
 chmod -Rf g+w ${HOME}/ || true

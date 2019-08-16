@@ -1,55 +1,65 @@
 FROM node:8-slim
 
-RUN apt-get update && \
-apt-get install -yq gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \
-libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 \
-libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 \
-libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
-fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
-ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget && \
-wget https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64.deb && \
-dpkg -i dumb-init_*.deb && rm -f dumb-init_*.deb && \
-apt-get clean && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+# Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
+# Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
+# installs, work.
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
+      --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN yarn global add puppeteer@1.8.0 && yarn cache clean
+# If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
+# uncomment the following lines to have `dumb-init` as PID 1
+ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
+ RUN chmod +x /usr/local/bin/dumb-init
+ # ENTRYPOINT ["dumb-init", "--"]
 
-ENV NODE_PATH="/usr/local/share/.config/yarn/global/node_modules:${NODE_PATH}"
+# Uncomment to skip the chromium download when installing puppeteer. If you do,
+# you'll need to launch puppeteer with:
+#     browser.launch({executablePath: 'google-chrome-unstable'})
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
-ENV PATH="/tools:${PATH}"
+# Install puppeteer so it's available in the container.
+RUN npm i puppeteer \
+    # Add user so we don't need --no-sandbox.
+    # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
+    && groupadd -r 1001 && useradd -r -g 0 -G audio,video 0 \
+    && mkdir -p /home/1001/s2i \
+	&& mkdir -p /opt/app-root \
+    && chown -R 1001:0 /home/1001 \
+	&& chown -R 1001:0 /opt/app-root \
+    && chown -R 1001:0 /node_modules
 
-RUN groupadd -r 1001 && useradd -r -g 0 -G audio,video 0
 
-COPY --chown=1001:0 ./tools /tools
+COPY ./s2i/ /opt/app-root/s2i
 
-# Set language to UTF8
-ENV LANG="C.UTF-8"
 
-WORKDIR /app
-ENV HOME=/app
-# Add user so we don't need --no-sandbox.
-
-COPY s2i /home/1001/s2i
 LABEL io.k8s.description="S2I builder image for puppeteer" \
       io.k8s.display-name="puppeteer" \
       io.openshift.expose-services="8080:http" \
       io.openshift.tags="puppeteer" \
-      io.openshift.s2i.scripts-url="image:///home/1001/s2i/bin"
-RUN mkdir /screenshots \
-	&& mkdir -p /home/1001/Downloads \
-    && chown -R 1001:0 /home/1001 \
-    && chown -R 1001:0 /usr/local/share/.config/yarn/global/node_modules \
-    && chown -R 1001:0 /screenshots \
-    && chown -R 1001:0 /app \
-    && chown -R 1001:0 /tools \
-    && find /home/1001/s2i -type d -exec chmod g+ws {} \;
+      io.openshift.s2i.scripts-url="image:///opt/app-root/s2i/bin"
+#aseguro que puedan ejecutar los scripts
+
+RUN chown -R 1001:0 /opt/app-root/s2i && \
+    find /opt/app-root/s2i -type d -exec chmod g+ws {} \;
+
 # Run everything after as non-privileged user.
 USER 1001
+ENV HOME=/opt/app-root
 
-# --cap-add=SYS_ADMIN
-# https://docs.docker.com/engine/reference/run/#additional-groups
 
-ENTRYPOINT ["dumb-init", "--"]
+RUN mkdir /opt/app-root/src && \
+find /opt/app-root -type d -exec chmod g+ws {} \;
 
- #CMD ["/usr/local/share/.config/yarn/global/node_modules/puppeteer/.local-chromium/linux-526987/chrome-linux/chrome"]
+# aseguro que la build este levantando como raiz, el directorio donde tengo los archivos estaticos
 
-CMD ["node", "index.js"]
+WORKDIR /opt/app-root/src
+
+# corro usage
+
+CMD [ "/opt/app-root/s2i/bin/usage" ]
+
+#CMD ["google-chrome-unstable"]

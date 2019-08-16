@@ -1,5 +1,6 @@
 #!/bin/bash -e
 set -e
 echo "puppeteer s2i is now running..."
-
-node ./index.js
+dumb-init --
+google-chrome-unstable
+node $/{HOME}/server.js
