@@ -54,6 +54,6 @@ WORKDIR /opt/app-root/src
 
 # corro usage
 
-CMD [ "/opt/app-root/s2i/bin/usage" ]
+#CMD [ "/opt/app-root/s2i/bin/usage" ]
 
-#CMD ["google-chrome-unstable"]
+CMD ["google-chrome-unstable"]
