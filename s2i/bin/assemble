@@ -7,6 +7,7 @@ rm -rf /tmp/src/.git*
 cp -Rf /tmp/src/. ${HOME}/src
 cd ${HOME}/src
 npm install
+npm i puppeteer
 npm run build
 rm -rf /tmp/src
 echo "---> Fix permissions on source files"
