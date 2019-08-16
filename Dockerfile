@@ -13,7 +13,7 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
 # If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
 # uncomment the following lines to have `dumb-init` as PID 1
 ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64 /usr/local/bin/dumb-init
- RUN chmod +x /usr/local/bin/dumb-init
+RUN chmod +x /usr/local/bin/dumb-init
  # ENTRYPOINT ["dumb-init", "--"]
 
 # Uncomment to skip the chromium download when installing puppeteer. If you do,
@@ -22,18 +22,12 @@ ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_a
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 # Install puppeteer so it's available in the container.
-RUN npm i puppeteer \
-    # Add user so we don't need --no-sandbox.
-    # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
-    && groupadd -r 1001 && useradd -r -g 0 -G audio,video 0 \
-    && mkdir -p /home/1001/s2i \
-	&& mkdir -p /opt/app-root \
-    && chown -R 1001:0 /home/1001 \
-	&& chown -R 1001:0 /opt/app-root \
-    && chown -R 1001:0 /node_modules
 
+RUN useradd -u 1001 -r -g 0 -G audio,video -d ${HOME} -s /sbin/nologin -c "Default Application User" default \
+    && mkdir -p ${HOME} \
+    && chown -R 1001:0 ${HOME} && chmod -R g+rwX ${HOME}
 
-COPY s2i /home/1001/s2i
+COPY s2i ${HOME}/s2i
 
 
 LABEL io.k8s.description="S2I builder image for puppeteer" \
@@ -48,7 +42,6 @@ RUN chown -R 1001:0 /opt/app-root && \
 
 # Run everything after as non-privileged user.
 USER 1001
-ENV HOME=/opt/app-root
 
 
 RUN mkdir /opt/app-root/src && \
