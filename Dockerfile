@@ -43,8 +43,8 @@ LABEL io.k8s.description="S2I builder image for puppeteer" \
       io.openshift.s2i.scripts-url="image:///home/1001/s2i/bin"
 #aseguro que puedan ejecutar los scripts
 
-RUN chown -R 1001:0 /opt/app-root/s2i && \
-    find /opt/app-root/s2i -type d -exec chmod g+ws {} \;
+RUN chown -R 1001:0 /opt/app-root && \
+    find /home/1001/s2i -type d -exec chmod g+ws {} \;
 
 # Run everything after as non-privileged user.
 USER 1001
