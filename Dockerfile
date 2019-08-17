@@ -28,7 +28,7 @@ RUN chmod +x /usr/local/bin/dumb-init
 #     browser.launch({executablePath: 'google-chrome-unstable'})
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
-# Install puppeteer so it's available in the container.
+# add user default
 
 RUN useradd -u 1001 -r -g 0 -G audio,video -d /opt/app-root -s /sbin/nologin -c "Default Application User" default \
     && mkdir -p /opt/app-root \
