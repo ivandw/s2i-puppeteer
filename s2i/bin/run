@@ -1,6 +1,6 @@
 #!/bin/bash -e
 set -e
-echo "puppeteer s2i is now running..."
-dumb-init --
-google-chrome-unstable
-node $/{HOME}/server.js
+#echo "puppeteer s2i is now running..."
+#dumb-init --
+google-chrome-unstable --no-sandbox --headless --hide-scrollbars --remote-debugging-port=9222 --disable-gpu &
+node server.js & echo "container is now running"
