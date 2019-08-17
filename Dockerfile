@@ -56,4 +56,4 @@ WORKDIR /opt/app-root/src
 
 #CMD [ "/opt/app-root/s2i/bin/usage" ]
 
-CMD ["google-chrome-unstable"]
+#CMD ["google-chrome-unstable"]
