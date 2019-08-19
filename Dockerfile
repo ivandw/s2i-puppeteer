@@ -29,6 +29,8 @@ RUN chmod +x /usr/local/bin/dumb-init
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 # Creo un usr default sin privilegios para utilizar s2i
+# add user default
+
 RUN useradd -u 1001 -r -g 0 -G audio,video -d /opt/app-root -s /sbin/nologin -c "Default Application User" default \
     && mkdir -p /opt/app-root \
     && chown -R 1001:0 /opt/app-root && chmod -R g+rwX /opt/app-root
