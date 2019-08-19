@@ -2,6 +2,6 @@
 set -e
 #echo "puppeteer s2i is now running..."
 #dumb-init --
-google-chrome-unstable --no-sandbox --headless --hide-scrollbars --disable-gpu 
+#google-chrome-unstable --no-sandbox --headless --hide-scrollbars --disable-gpu 
 echo "chrome started.."
-node server.js && echo "container is now running"
+node server.js && echo "app is now running"
