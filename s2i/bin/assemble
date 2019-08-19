@@ -87,6 +87,7 @@ else
 
 	echo "---> Installing all dependencies"
 	NODE_ENV=development npm install
+	npm i puppeteer
 
 	#do not fail when there is no build script
 	echo "---> Building in production mode"
