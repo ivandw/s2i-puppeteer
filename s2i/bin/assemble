@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Prevent running assemble in builders different than official STI image.
 # The official nodejs:8-onbuild already run npm install and use different

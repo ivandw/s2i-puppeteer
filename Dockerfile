@@ -36,8 +36,10 @@ RUN useradd -u 1001 -r -g 0 -G audio,video -d /opt/app-root -s /sbin/nologin -c 
     && chown -R 1001:0 /opt/app-root && chmod -R g+rwX /opt/app-root
 
 RUN mkdir /screenshots \
-	&& mkdir -p /home/pptruser/Downloads \
-    && chown -R 1001:0 /home/pptruser \
+        && npm i puppeteer \ 
+	&& mkdir -p /home/1001/Downloads \
+    && chown -R 1001:0 /home/1001/ \
+   && chown -R 1001:0 /node_modules \
  #   && chown -R 1001:0 /usr/local/share/.config/yarn/global/node_modules \
     && chown -R 1001:0 /screenshots
 	
